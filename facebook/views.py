@@ -1,41 +1,61 @@
 # Create your views here.
-import urllib
+import urllib, cgi
 
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from django.contrib.auth import login as auth_login
-from django.contrib.auth import authenticate
 from django.core.urlresolvers import reverse
+from django.contrib import auth
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.contrib.auth import logout
+
+from socialbum import settings
+from facebook.models import FacebookSession
 
 def login(request):
-    """ First step of process, redirects user to facebook, which redirects to authentication_callback. """
+    error = None
 
-    args = {
-        'client_id': settings.FACEBOOK_APP_ID,
-        'scope': settings.FACEBOOK_SCOPE,
-        'redirect_uri': request.build_absolute_uri('/facebook/authentication_callback'),
-    }
-    return HttpResponseRedirect('https://www.facebook.com/dialog/oauth?' + urllib.urlencode(args))
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('gm_home'))
 
-def authentication_callback(request):
-    """ Second step of the login process.
-    It reads in a code from Facebook, then redirects back to the home page. """
-    code = request.GET.get('code')
-    user = authenticate(token=code, request=request)
+    if request.GET:
+        if 'code' in request.GET:
+            args = {
+                'client_id': settings.FACEBOOK_APP_ID,
+                'redirect_uri': settings.FACEBOOK_REDIRECT_URI,
+                'client_secret': settings.FACEBOOK_API_SECRET,
+                'code': request.GET['code'],
+            }
 
-    if user.is_anonymous():
-        #we have to set this user up
-        url = reverse('facebook_setup')
-        url += "?code=%s" % code
+            url = 'https://graph.facebook.com/oauth/access_token?' + \
+                    urllib.urlencode(args)
+            response = cgi.parse_qs(urllib.urlopen(url).read())
+            access_token = response['access_token'][0]
+            expires = response['expires'][0]
 
-        resp = HttpResponseRedirect(url)
+            facebook_session = FacebookSession.objects.get_or_create(
+                access_token=access_token,
+            )[0]
 
-    else:
-        auth_login(request, user)
+            facebook_session.expires = expires
+            facebook_session.save()
 
-        #figure out where to go after setup
-        url = getattr(settings, "LOGIN_REDIRECT_URL", "/")
+            user = auth.authenticate(token=access_token)
+            if user:
+                if user.is_active:
+                    auth.login(request, user)
+                    return HttpResponseRedirect(reverse('gm_home'))
+                else:
+                    error = 'AUTH_DISABLED'
+            else:
+                error = 'AUTH_FAILED'
+        elif 'error_reason' in request.GET:
+            error = 'AUTH_DENIED'
 
-        resp = HttpResponseRedirect(url)
+    template_context = {'settings': settings, 'error': error}
+    return render_to_response('login.html', template_context, context_instance=RequestContext(request))
 
-    return resp
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('home'))

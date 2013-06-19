@@ -72,6 +72,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/vagrant/app/static',
 )
 
 # List of finder classes that know how to find static files in
@@ -111,6 +112,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/vagrant/app/templates',
 )
 
 INSTALLED_APPS = (
@@ -125,15 +127,15 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'album',
-    'facebook'
+    'facebook',
+    'home'
 )
 
 # Facebook settings are set via environment variables
 FACEBOOK_APP_ID = '596137767071762'
 FACEBOOK_APP_SECRET = '41c7c571cac7e8b2d5cccf631107a347'
 FACEBOOK_SCOPE = 'email,publish_stream'
-
-AUTH_PROFILE_MODULE = 'facebook.FacebookProfile'
+FACEBOOK_REDIRECT_URI = 'http://localhost:8000/login/'
 
 AUTHENTICATION_BACKENDS = (
     'facebook.backend.FacebookBackend',
