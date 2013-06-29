@@ -128,14 +128,19 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'album',
     'facebook',
-    'home'
+    'home',
+    'game'
+    #'registration'
 )
 
 # Facebook settings are set via environment variables
 FACEBOOK_APP_ID = '596137767071762'
 FACEBOOK_APP_SECRET = '41c7c571cac7e8b2d5cccf631107a347'
 FACEBOOK_SCOPE = 'email,publish_stream'
-FACEBOOK_REDIRECT_URI = 'http://localhost:8000/login/'
+FACEBOOK_REDIRECT_URI = 'http://localhost:8888/facebook/login/'
+FACEBOOK_GRAPH_URI = 'https://graph.facebook.com/'
+
+LOGIN_URL = 'facebook/login'
 
 AUTHENTICATION_BACKENDS = (
     'facebook.backend.FacebookBackend',
@@ -170,3 +175,6 @@ LOGGING = {
         },
     }
 }
+
+#django-registration
+ACCOUNT_ACTIVATION_DAYS=7

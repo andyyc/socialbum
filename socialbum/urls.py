@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^$', include('home.urls')),
     url(r'^facebook/', include('facebook.urls')),
+    url(r'^album/', include('album.urls')),
+    # url(r'^accounts/', include('registration.backends.simple.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

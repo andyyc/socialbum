@@ -1,0 +1,78 @@
+.navbar .nav > li > a#user-nav {
+    padding: 14px 10px 14px;
+}
+
+.padding-top{
+    padding-top:10px;
+}
+.padding-bottom{
+    padding-bottom:10px;
+}
+.padding-left{
+    padding-left:10px;
+}
+.padding-right{
+    padding-right:10px;
+}
+.more-padding-top{
+    padding-top:14px;
+}
+.more-padding-bottom{
+    padding-bottom:14px;
+}
+.more-padding-left{
+    padding-left:14px;
+}
+.more-padding-right{
+    padding-right:14px;
+}
+.most-padding-top{
+    padding-top:18px;
+}
+.most-padding-bottom{
+    padding-bottom:18px;
+}
+.most-padding-left{
+    padding-left:18px;
+}
+.most-padding-right{
+    padding-right:18px;
+}
+.less-padding-top{
+    padding-top:6px;
+}
+.less-padding-bottom{
+    padding-bottom:6px;
+}
+.less-padding-left{
+    padding-left:6px;
+}
+.less-padding-right{
+    padding-right:6px;
+}
+.least-padding-top{
+    padding-top:2px;
+}
+.least-padding-bottom{
+    padding-bottom:2px;
+}
+.least-padding-left{
+    padding-left:2px;
+}
+.least-padding-right{
+    padding-right:2px;
+}
+
+.text-center{
+    text-align:center;
+}
+.text-right{
+    text-align:right;
+}
+.text-left{
+    text-align:left;
+}
+
+.bold{
+    font-weight: bold;
+}

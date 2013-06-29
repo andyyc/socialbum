@@ -1,0 +1,55 @@
+{%  extends 'base.html' %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{%  block content %}
+
+  <div class="create-game-container most-padding-top">
+    <button type="submit" class="btn btn-primary create-game-btn">Start Game</button>
+  </div>
+
+  <div class="add-user-container most-padding-top">
+    <h4>Start a game with</h4>
+    <table class="table">
+    {% for friend in app_friends_list %}
+      <tr class="add-user-row">
+        <td>
+          <img src="{{ friend.picture_url }}"/>
+        </td>
+        <td>
+          {{ friend.name }}
+        </td>
+        <td>
+          <button type="submit" class="btn btn-primary add-user-btn add-user-btn">Add</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  </div>
+  <div class="invite-friends-container most-padding-top">
+    <h4>Invite Friends</h4>
+
+    <table class="table">
+    {% for friend in fb_friends_list %}
+      <tr>
+        <td>
+          <img src="{{ friend.picture_url }}"/>
+        </td>
+        <td>
+        {{ friend.name }}
+        </td>
+        <td>
+          <button type="submit" class="btn btn-primary">Invite</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  </div>
+{%  endblock %}
+
+
+{% block footer_js %}
+  <script src="{{ STATIC_URL }}js/contacts.js"></script>
+{% endblock %}

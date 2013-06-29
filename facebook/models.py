@@ -48,6 +48,9 @@ class FacebookSession(models.Model):
         return response
 
     def get_facebook_profile(self):
-
         fb_profile = urllib.urlopen('https://graph.facebook.com/me?access_token=%s' % self.access_token)
         return simplejson.load(fb_profile)
+
+    def get_friends(self):
+        fb_friends = urllib.urlopen('https://graph.facebook.com/me/friends?access_token=%s' % self.access_token)
+        return simplejson.load(fb_friends)

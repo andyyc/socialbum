@@ -1,0 +1,11 @@
+#createAlbumModal > .modal-body > #create-album-form {
+    margin: 0px 0px;
+}
+
+.create-album-modal-link{
+    color:#ddd;
+}
+
+.album-row li:nth-child(4n+1) {
+    margin-left: 0px;
+ }

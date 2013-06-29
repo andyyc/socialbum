@@ -1,20 +1,94 @@
-<html>
-    <head>
-        <title>Facebook OAUTH2 example project</title>
-    </head>
-    <body>
-        <h1>Facebook OAUTH2 Test Project</h1>
-        {% if user.is_authenticated %}
-        <h2>You are logged in as: {{ user }}</h2>
-        <a href="/logout">Logout</a>
-        <hr />
-        <h2>User info</h2>
-        <img src="http://graph.facebook.com/{{ user.get_profile.facebook_id }}/picture" /><br />
-        <pre>{{ facebook_profile|pprint }}</pre>
-        {% else %}
-        <a href="/facebook/login">Login via Facebook</a>
-        {% endif %}
-        <hr />
-        <a href="/admin">Admin</a>
-    </body>
-</html>
+{%  extends 'base.html' %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/album.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{%  block content %}
+  <div class="row-fluid album-row most-padding-top">
+    <ul class="thumbnails">
+      {% if not albums %}
+      <li class="span3">
+        <a href="#createAlbumModal" data-toggle="modal">
+          <div class="thumbnail">
+            <img data-src="holder.js/300x200/text:Create Album" alt="300x200"/>
+            <div class="caption">
+              <p class="text-center">Title</p>
+            </div>
+          </div>
+        </a>
+      </li>
+      <li class="span3">
+        <a href="#createAlbumModal" data-toggle="modal">
+          <div class="thumbnail">
+            <img data-src="holder.js/300x200/text:Create Album" alt="300x200"/>
+            <div class="caption">
+              <p class="text-center">Title</p>
+            </div>
+          </div>
+        </a>
+      </li>
+      <li class="span3">
+        <a href="#createAlbumModal" data-toggle="modal">
+          <div class="thumbnail">
+            <img data-src="holder.js/300x200/text:Create Album" alt="300x200"/>
+            <div class="caption">
+              <p class="text-center">Title</p>
+            </div>
+          </div>
+        </a>
+      </li>
+      <li class="span3">
+        <a href="#createAlbumModal" data-toggle="modal">
+          <div class="thumbnail">
+            <img data-src="holder.js/300x200/text:Create Album" alt="300x200"/>
+            <div class="caption">
+              <p class="text-center">Title</p>
+            </div>
+          </div>
+        </a>
+      </li>
+      {%  else %}
+      {% for album in albums %}
+      <li class="span3">
+          <div class="thumbnail">
+            <img data-src="holder.js/300x200/text:Default" alt="300x200"/>
+            <div class="caption">
+              <p class="text-center">{{ album.name }}</p>
+            </div>
+          </div>
+      </li>
+      {% endfor %}
+      <li class="span3">
+        <a class="create-album-modal-link" href="#createAlbumModal" data-toggle="modal">
+          <div class="thumbnail">
+            <img data-src="holder.js/300x200/text:Create Album" alt="300x200"/>
+            <div class="caption">
+              <p class="text-center">Title</p>
+            </div>
+          </div>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+
+    <div id="createAlbumModal" class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="createAlbumModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="createAlbumModalLabel">Create Album</h3>
+      </div>
+      <div class="modal-body">
+        <form id="create-album-form" action="{% url 'create_album' %}" method="post">{% csrf_token %}
+            {{ album_form.as_p }}
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="create-album-btn">Create</button>
+          </div>
+        </form>
+      </div>
+  </div>
+{%  endblock %}
+
+
+{% block footer_js %}
+  <script src="{{ STATIC_URL }}js/album.js"></script>
+{% endblock %}
