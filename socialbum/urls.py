@@ -9,6 +9,8 @@ urlpatterns = patterns('',
     url(r'^$', include('home.urls')),
     url(r'^facebook/', include('facebook.urls')),
     url(r'^album/', include('album.urls')),
+    url(r'^game/', include('game.urls')),
+
     # url(r'^accounts/', include('registration.backends.simple.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

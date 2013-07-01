@@ -1,0 +1,65 @@
+{%  extends 'base.html' %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{%  block content %}
+  <div class="add-user-container most-padding-top">
+    <h4>Start a game with</h4>
+    <table class="table">
+    {% for friend in user_friends_list %}
+      <tr class="add-user-row">
+        <td>
+          <img src="{{ friend.picture_url }}"/>
+        </td>
+        <td>
+          {{ friend.name }}
+        </td>
+        <td>
+          <button type="submit" class="btn btn-primary add-user-btn add-user-btn" user_id="{{ friend.user_id }}">Add</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  </div>
+  <div class="invite-friends-container most-padding-top">
+    <h4>Invite Friends</h4>
+
+    <table class="table">
+    {% for friend in fb_friends_list %}
+      <tr>
+        <td>
+          <img src="{{ friend.picture_url }}"/>
+        </td>
+        <td>
+        {{ friend.name }}
+        </td>
+        <td>
+          <button type="submit" class="btn btn-primary">Invite</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  </div>
+{%  endblock %}
+
+{% block navbar_bottom %}
+  <div class="row-fluid create-game-container">
+      {% if gf.users.errors %}
+        <div class="flash">You must add at least two people</div>
+      {% endif %}
+
+      <form id="create-form" class="" action="{% url 'create_game' %}" method="post">
+        {% csrf_token %}
+        <div id="user_friends_checkboxes" class="hidden">
+          {{ gf.users }}
+        </div>
+        <button type="submit" class="btn btn-primary create-game-btn">Start Game</button>
+      </form>
+  </div>
+{% endblock %}
+
+{% block footer_js %}
+  <script src="{{ STATIC_URL }}js/contacts.js"></script>
+{% endblock %}

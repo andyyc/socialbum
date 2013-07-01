@@ -18,9 +18,6 @@
         padding-top: 60px;
         padding-bottom: 40px;
       }
-      .sidebar-nav {
-        padding: 9px 0;
-      }
 
       @media (max-width: 980px) {
         /* Enable use of floated navbar text */
@@ -86,16 +83,22 @@
       </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid middle-container">
       <div class="row-fluid">
         <div class="span12">
           {%  block content %}{% endblock %}
         </div><!--/span-->
       </div><!--/row-->
       <footer>
+        {% block footer %}
+        {% endblock %}
       </footer>
-
     </div><!--/.fluid-container-->
+
+    <div class="navbar navbar-fixed-bottom">
+      {% block navbar_bottom %}
+      {% endblock %}
+    </div>
 
     <!-- Le javascript
     ================================================== -->
