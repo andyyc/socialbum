@@ -129,7 +129,9 @@ INSTALLED_APPS = (
     'album',
     'facebook',
     'home',
-    'game'
+    'game',
+    'scripts',
+    'south'
     #'registration'
 )
 

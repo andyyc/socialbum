@@ -3,18 +3,19 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.utils import simplejson
 
-from game.models import *
-from game.forms import *
+from game.models import Game, GameTopic, Player, Topic, Turn, Submission
+from game.forms import GameTopicForm, GameForm
 from facebook.views import get_friends_list
 from facebook.models import FacebookSession
 
+import json
+
 @login_required
-def home(request):
+def games(request):
     games = Game.objects.filter(users__id=request.user.id)
     template_context = {'games':games}
-    return render_to_response('home.html', template_context, context_instance=RequestContext(request))
+    return render_to_response('games.html', template_context, context_instance=RequestContext(request))
 
 @login_required
 def create(request):
@@ -34,13 +35,11 @@ def create(request):
                                        game=g,
                                        points=0)
             
-            #create black deck
-            bc_tmpls = BlackCardTmpl.objects.all()
-            for bc_tmpl in bc_tmpls:
-                bc = BlackCard.objects.create(card=bc_tmpl,
-                                              game=g,
-                                              status='A')
-                bc.save()
+
+            topics = Topic.objects.all()
+            for topic in topics:
+                game_topic = GameTopic.objects.create(topic=topic,
+                                                        game=g)
             #create turn
             turn = Turn.objects.create(game=g,
                                        num=0,
@@ -49,13 +48,12 @@ def create(request):
             g.save()
             
             return HttpResponseRedirect(reverse('game', kwargs={'game_id':g.id}))
-        print gf
     else:
         gf = GameForm()
 
     try:
         fb_profile = FacebookSession.objects.get(user=request.user)
-    except:
+    except FacebookSession.DoesNotExist:
         raise Http404
 
     user_friends_list, user_friends_queryset, only_fb_friends_list = get_friends_list(fb_profile)
@@ -66,56 +64,57 @@ def create(request):
                         'fb_friends_list':only_fb_friends_list}
     return render_to_response('create_game.html', template_context, context_instance=RequestContext(request))
 
+@login_required
 def game(request, game_id):
-    g = Game.objects.get(id=game_id)
+    try:
+        g = Game.objects.get(id=game_id)
+    except Game.DoesNotExist:
+        raise Http404
     turn = g.current_turn
     
-    if(turn.status == 0):
+    if turn.status == 0:
         if turn.judge == request.user:
-            return pick_black_card(request, g)
+            return choose_topic(request, g)
         else:
             return show_point_table(request, g)
-    elif(turn.status == 1):
+    elif turn.status == 1:
         if turn.judge == request.user:
             return pick_winner(request, g)
         else:
-            return pick_white_card(request, g)
+            return draw(request, g)
     else:
         start_new_turn(request=request, game=g)
         return game(request, game_id)
 
-def pick_black_card(request, game):
-    bcf = None
+def choose_topic(request, game):
     if request.method == 'POST':
-        bcf = BlackCardForm(request.POST)
-        if bcf.is_valid():
+        game_topic_form = GameTopicForm(request.POST)
+        if game_topic_form.is_valid():
             #need to check that bc has not been used already
-            bc = bcf.cleaned_data['black_card']
-            choices_ids = bcf.cleaned_data['choice_list']
-            BlackCard.objects.filter(id__in=choices_ids.split(',')).update(status='N')
+            game_topic = game_topic_form.cleaned_data['game_topic']
+            game_topic.used = True
+            game_topic.save()
             game.current_turn.status = 1
-            game.current_turn.black_card = bc
+            game.current_turn.game_topic = game_topic
             game.current_turn.save()
             return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
-    
-    choices = game.blackcard_set.filter(status='A')[0:3]
-        
-    if not bcf:
-        choices_ids = choices.values_list('id', flat=True)
-        choices_ids = ','.join(str(i) for i in choices_ids)
-        bcf = BlackCardForm(initial={'choice_list':choices_ids})
-    
-    bcf.fields["black_card"].queryset = choices
+    else:
+        game_topic_form = GameTopicForm()
 
-    template_context = {'bcf':bcf, 'game':game, 'topics':choices}
-    return render_to_response('pick_black_card.html', 
+    game_topics = game.gametopic_set.filter(used=False).order_by('?')[0:3]
+    game_topic_form.fields["game_topic"].queryset = game_topics
+    template_context = {'game_topic_form':game_topic_form,
+                        'game':game,
+                        'game_topics':game_topics}
+
+    return render_to_response('choose_topic.html',
                               template_context,
                               context_instance=RequestContext(request)) 
 
 def show_point_table(request, game):
-    players = Player.objects.filter(game=game)
+    players = game.player_set.all()
     template_context = {'players':players}
-    return render_to_response('point_table.html', 
+    return render_to_response('points_table.html',
                               template_context,
                               context_instance=RequestContext(request)) 
 
@@ -158,51 +157,19 @@ def start_new_turn(request, game):
     game.current_turn = turn
     game.save()
 
-def show_submissions(request, game, judge=False):
+@login_required
+def show_submissions(request, game):
     # should check to see if user is judge
-
-    sub_id = request.GET.get('sub_id', None)
-    
+    is_judge = game.current_turn.judge == request.user
     submissions = Submission.objects.filter(turn=game.current_turn)
-    next_id = None
-    prev_id = None
-    if len(submissions) > 0:
-        subs_list = list(submissions.values_list('id', flat=True))
-        print subs_list
-        if sub_id:
-            submission = Submission.objects.get(id=sub_id)
-            idx = subs_list.index(int(sub_id))
-            next_id = subs_list[(idx+1)%len(subs_list)]
-            prev_id = subs_list[(idx+1)%len(subs_list)]
-        else:
-            submission = submissions[0]
-            next_id = subs_list[1%len(subs_list)]
-            prev_id = subs_list[-1%len(subs_list)]
-    else:
-        submission = None
-    
-    clickX = []
-    clickY = []
-    clickDrag = []
-    clickColor = []
-    clickSize = []
-    if submission:
-        from django.utils.encoding import smart_str
-        clickX = eval(submission.clickX)
-        clickY = eval(submission.clickY)
-        clickDrag = eval(submission.clickDrag)
-        clickColor = eval(submission.clickColor)
-        clickSize = eval(submission.clickSize)
 
-        for i in xrange(len(clickX)):
-            clickX[i] = smart_str(clickX[i])
-            clickY[i] = smart_str(clickY[i])
-            clickDrag[i] = smart_str(clickDrag[i])
-            clickColor[i] = smart_str(clickColor[i])
-            clickSize[i] = smart_str(clickSize[i])
-        clickDrag = str(clickDrag).replace("'","")
+    from django.core import serializers
+    submissions_json = serializers.serialize('json',
+                                            submissions,
+                                            fields=('id', 'clickX', 'clickY', 'clickDrag', 'clickSize', 'clickColor'))
 
-    if judge:
+    """
+    if is_judge:
         if request.method == 'POST':
             if submission != None:
                 game.current_turn.winner = submission
@@ -214,41 +181,40 @@ def show_submissions(request, game, judge=False):
                 #start next turn
                 start_new_turn(request, game)
                 return show_point_table(request, game)
+    """
 
-    template_context = {'clickX':clickX,
-                        'clickY':clickY,
-                        'clickDrag':clickDrag,
-                        'clickColor':clickColor,
-                        'clickSize':clickSize,
-                        'submission':submission,
-                        'next_id':next_id,
-                        'prev_id':prev_id,
-                        'judge':judge,
-                        'game':game}
+    template_context = {'judge':is_judge,
+                        'game':game,
+                        'submissions':submissions,
+                        'submissions_json':submissions_json}
     return render_to_response('submissions.html',
                               template_context,
                               context_instance=RequestContext(request))
 
-def pick_white_card(request, game):
+@login_required
+def draw(request, game):
     #check if user has already submitted a card
-    p = Player.objects.get(user=request.user, game=game)
     try:
-        s = Submission.objects.get(player=p, turn=game.current_turn)
+        p = Player.objects.get(user=request.user, game=game)
+    except Player.DoesNotExist:
+        raise Http404
+
+    try:
+        Submission.objects.get(player=p, turn=game.current_turn)
         submitted = True
-    except:
+    except Submission.DoesNotExist:
         submitted = False
 
     if submitted:
         return show_submissions(request, game)
-    
-    #hand = WhiteCard.objects.filter(game=game, user=request.user, turn=None, status='P')
-    if request.method == 'POST' and request.is_ajax():
-        rdict = {}
-        clickX = request.POST.getlist('clickX[]')
-        clickY = request.POST.getlist('clickY[]')
-        clickDrag = request.POST.getlist('clickDrag[]')
-        clickColor = request.POST.getlist('clickColor[]')
-        clickSize = request.POST.getlist('clickSize[]')
+
+    submit_error = False
+    if request.method == 'POST':
+        clickX = request.POST.get('clickX')
+        clickY = request.POST.get('clickY')
+        clickDrag = request.POST.get('clickDrag')
+        clickColor = request.POST.get('clickColor')
+        clickSize = request.POST.get('clickSize')
         if clickX and clickY and clickDrag and clickColor and clickSize:
             Submission.objects.create(clickX=clickX,
                                       clickY=clickY,
@@ -257,14 +223,13 @@ def pick_white_card(request, game):
                                       clickSize=clickSize,
                                       player=p,
                                       turn=game.current_turn)
-            rdict.update({'status':'success'})
-            return HttpResponse(simplejson.dumps(rdict))
+            return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
         else:
-            rdict.update({'status':'error'})
-            return HttpResponse(simplejson.dumps(rdict))
+            submit_error = True
 
-    #wcf.fields["white_card"].queryset = hand
-    template_context = {'game':game}
-    return render_to_response('pick_white_card.html',
+    template_context = {'game':game,
+                        'submit_error':submit_error}
+
+    return render_to_response('draw.html',
                               template_context,
                               context_instance=RequestContext(request))

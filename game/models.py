@@ -9,45 +9,27 @@ class Game(models.Model):
 
 class Turn(models.Model):
     STATUSES = (
-        (0, 'Started'),
-        (1, 'Voting'),
-        (2, 'Ended'),
+        (0, 'Choose Topic'),
+        (1, 'Waiting Submissions'),
+        (2, 'Select Winner'),
+        (3, 'Turn End'),
     )
 
     game = models.ForeignKey(Game)
     num = models.PositiveSmallIntegerField()
     judge = models.ForeignKey(User)
-    black_card = models.OneToOneField('BlackCard', null=True)
+    game_topic = models.OneToOneField('GameTopic', null=True)
     winner = models.OneToOneField('Submission', null=True, related_name='+')
     status = models.PositiveSmallIntegerField(default=0, choices=STATUSES)
 
 # Create your models here.
-class BlackCardTmpl(models.Model):
+class Topic(models.Model):
     text = models.TextField()
 
-class WhiteCardTmpl(models.Model):
-    text = models.TextField()
-
-class BlackCard(models.Model):
-    STATUSES = (
-        ('N', 'Not Available'),
-        ('A', 'Available'),
-    )
-    card = models.ForeignKey(BlackCardTmpl)
+class GameTopic(models.Model):
+    topic = models.ForeignKey(Topic)
     game = models.ForeignKey('Game')
-    status = models.CharField(max_length=1, choices=STATUSES, default='A')
-
-class WhiteCard(models.Model):
-    STATUSES = (
-        ('P', 'Played'),
-        ('D', 'Discarded'),
-        ('U', 'Unused'),
-    )
-    card = models.ForeignKey(WhiteCardTmpl)
-    game = models.ForeignKey('Game')
-    user = models.ForeignKey(User, null=True)
-    turn = models.ForeignKey(Turn, null=True)
-    status = models.CharField(max_length=1, choices=STATUSES, default='U')
+    used = models.BooleanField(default=False)
 
 class Submission(models.Model):
     clickX = models.TextField()

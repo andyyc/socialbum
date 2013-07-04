@@ -15,4 +15,14 @@ $(document).ready(function(){
             checkbox.prop("checked", true);
         }
     });
+
+    $('.topic-cell').click(function(){
+    var game_topic_id = $(this).attr('name');
+    var game_topic_checkbox = $('input[name="game_topic"]' + '[value=' + game_topic_id + ']');
+
+    $('#topic-btn').removeAttr('disabled');
+    $('.topic-cell').removeClass('selected');
+    $(this).addClass('selected');
+    game_topic_checkbox.prop("checked", true);
+  });
 });

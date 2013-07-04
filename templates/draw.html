@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block css %}
+<style type="text/css">
+#middle {
+ overflow-x:hidden;
+ overflow-y:hidden;
+}
+</style>
+{% endblock %}
+
+{% block header_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/html5-canvas-drawing-app-simple.js"></script>
+{% endblock %}
+
+{% block content %}
+<p>You are drawing {{ game.current_turn.game_topic.topic.text }}</p>
+<!--[if IE]><script type="text/javascript" src="{{ STATIC_URL }}js/excanvas.js"></script><![endif]-->
+<div class="btn-toolbar">
+  <div class="btn-group">
+    <a class="btn" href="#"><div id="choosePurpleSimpleTools" class="circle" style="background-color:#cb3594"></div></a>
+    <a class="btn" href="#"><div id="chooseGreenSimpleTools" class="circle" style="background-color:#659b41"></div></a>
+    <a class="btn" href="#"><div id="chooseYellowSimpleTools" class="circle" style="background-color:#ffcf33"></div></a>
+    <a class="btn" href="#"><div id="chooseBrownSimpleTools" class="circle" style="background-color:#986928"></div></a>
+  </div>
+</div>
+
+<div id="canvasSimpleToolsDivOuter">
+  <div id="canvasSimpleToolsDiv">
+  </div>
+</div>
+
+<div class="btn-toolbar">
+  <div class="pencil-btn-group btn-group dropup">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-pencil"></i><span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li id="chooseSmallSimpleTools" >
+        <div class="small-circle"></div>
+      </li>
+      <li id="chooseNormalSimpleTools">
+        <div class="normal-circle"></div>
+      </li>
+      <li id="chooseLargeSimpleTools" >
+        <div class="large-circle"></div>
+      </li>
+      <li id="chooseHugeSimpleTools" >
+        <div class="huge-circle"></div>
+      </li>
+    </ul>
+  </div>
+  <div class="btn-group">
+    <a class="btn" href="#" id="chooseEraserSimpleTools">E</a>
+    <a class="btn" href="#" id="clearCanvasSimpleTools"><i class="icon-trash"></i></a>
+  </div>
+</div>
+
+<form id="draw-form" action="{% url 'game' game.id %}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="clickX" value="">
+  <input type="hidden" name="clickY" value="">
+  <input type="hidden" name="clickColor" value="">
+  <input type="hidden" name="clickDrag" value="">
+  <input type="hidden" name="clickSize" value="">
+  <button id="submit-btn" class="btn btn-primary">Submit Drawing</button>
+</form>
+{% endblock %}
+
+
+{% block footer_js %}
+<script type="text/javascript">
+  $(document).ready(function(){
+    drawingApp.prepareSimpleToolsCanvas();
+  });
+</script>
+{% endblock %}
+
+
+{% block footer %}
+{% endblock %}

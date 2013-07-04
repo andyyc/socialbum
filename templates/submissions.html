@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block header_js %}
+{% endblock %}
+
+{% block title %}
+Viewing submissions
+{% endblock %}
+
+
+{% block content %}
+  {% if submissions %}
+    <h3>Viewing submissions</h3>
+    <!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+    <div id="canvasSimpleToolsDivOuter">
+      <div id="myCarousel" class="carousel slide">
+        <!-- Carousel items -->
+        <div class="carousel-inner">
+          {% for submission in submissions %}
+          <div class="{% if forloop.first %}active {% endif %}item">
+            <div id="canvasSimpleToolsDiv" name="{{ forloop.counter0 }}">
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- Carousel nav -->
+        <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+        <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
+      </div>
+    </div>
+  {% else %}
+  <h3>Waiting for submissions</h3>
+  {% endif %}
+{% endblock %}
+
+{% block footer_js %}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/html5-canvas-drawing-app-simple.js"></script>
+  {% if submissions %}
+  <script type="text/javascript">
+      $(document).ready(function(){
+        var submissions = {{ submissions_json|safe }};
+        drawingApp.drawImage(submissions[0]['fields']['clickX'],
+                              submissions[0]['fields']['clickY'],
+                              submissions[0]['fields']['clickColor'],
+                              submissions[0]['fields']['clickSize'],
+                              submissions[0]['fields']['clickDrag']);
+
+        $('.carousel').carousel({
+          interval:false
+        });
+    });
+  </script>
+  {% endif %}
+{% endblock %}
+
+{% block footer %}
+{% if judge %}
+<form id="submission_form" class="less_toppadded" action="{% url 'game' game.id %}" method="post">
+  {% csrf_token %}
+  <div id="select_btn" class="button">Select</div>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+  <div class="more-margin-top more-margin-bottom">
+    <a class="btn btn-block btn-info" href="{% url 'create_game' %}">Start a new game</a>
+  </div>
+
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Current Games</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in games %}
+      <tr>
+        <td>
+          <a href="{% url 'game' game.id %}">
+            <div class="game-photos">
+              {% for user in game.users.all %}
+              <img src="{{ user.facebooksession_set.all.0.picture_url }}" />
+              {% endfor %}
+            </div>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

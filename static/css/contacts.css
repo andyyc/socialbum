@@ -12,4 +12,78 @@
 
 #create-form{
     margin-top:14px;
+    padding-left:20px;
+    padding-right:20px;
+}
+
+.topic-cell{
+    cursor:pointer;
+}
+
+.circle {
+	border-radius: 50%;
+	width: 15px;
+	height: 15px;
+	/* width and height can be anything, as long as they're equal */
+}
+
+.small-circle {
+	border-radius: 50%;
+	width: 2px;
+	height: 2px;
+    background-color:white;
+}
+.normal-circle {
+	border-radius: 50%;
+	width: 5px;
+	height: 5px;
+    background-color:white;
+}
+.large-circle {
+	border-radius: 50%;
+	width: 10px;
+	height: 10px;
+    background-color:white;
+}
+.huge-circle {
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+    background-color:white;
+}
+
+.pencil-btn-group .dropdown-menu{
+    width:62px;
+    min-width:0px;
+}
+
+.pencil-btn-group .dropdown-menu li{
+    height:20px;
+    padding:3px;
+    cursor:pointer;
+}
+
+#canvasSimpleToolsDivOuter{
+  border:2px solid #eee;
+  display:inline-block;
+}
+
+.canvasSimpleToolsDiv{
+/*  width:320px;
+  height:370px; */
+}
+
+.canvasSimpleTools{
+  cursor:pointer;
+/*  width:320px;
+  height:370px; */
+}
+
+.carousel{
+    margin-bottom:0px;
+}
+
+.carousel-control{
+    top:50%;
+    opacity:0.2;
 }

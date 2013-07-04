@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>
+  Points Table
+</h3>
+<table id="points_table" class="table table-bordered">
+  {% for p in players %}
+  <tr>
+    <td>
+      {{ p.user.first_name }} {{ p.user.last_name }}
+    </td>
+    <td>
+      {{ p.points }}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
