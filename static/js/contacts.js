@@ -17,12 +17,20 @@ $(document).ready(function(){
     });
 
     $('.topic-cell').click(function(){
-    var game_topic_id = $(this).attr('name');
-    var game_topic_checkbox = $('input[name="game_topic"]' + '[value=' + game_topic_id + ']');
+        var game_topic_id = $(this).attr('name');
+        var game_topic_checkbox = $('input[name="game_topic"]' + '[value=' + game_topic_id + ']');
 
-    $('#topic-btn').removeAttr('disabled');
-    $('.topic-cell').removeClass('selected');
-    $(this).addClass('selected');
-    game_topic_checkbox.prop("checked", true);
-  });
+        $('#topic-btn').removeAttr('disabled');
+        $('.topic-cell').removeClass('selected');
+        $(this).addClass('selected');
+        game_topic_checkbox.prop("checked", true);
+    });
+
+    $('#submission-form').submit(function(){
+        var sub_id = $("#drawing-carousel div.active").attr('name');
+        var checkbox = $(this).find('input[name=submission][value=' + sub_id + ']');
+        checkbox.prop("checked", true);
+        return true;
+    });
+
 });

@@ -12,14 +12,5 @@ class GameTopicChoiceField(forms.ModelChoiceField):
 class GameTopicForm(forms.Form):
     game_topic = GameTopicChoiceField(widget=forms.RadioSelect(),required=True,empty_label=None,queryset=GameTopic.objects.all())
 
-"""
-class SubmissionForm(forms.Form):
-    clickX = forms.RegexField(regex='^[\d,]+$', required=False)
-    clickY = forms.MultipleChoiceField(required=False)
-    clickSize = forms.MultipleChoiceField(required=False)
-    clickColor = forms.MultipleChoiceField(required=False)
-    clickDrag = forms.MultipleChoiceField(required=False)
-"""
-
 class SubmissionChoiceForm(forms.Form):
-    submission_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
+    submission = forms.ModelChoiceField(widget=forms.RadioSelect(), required=True,empty_label=None,queryset=Submission.objects.all())

@@ -2,6 +2,11 @@
     background-color:#eee;
 }
 
+#points_table td.winner{
+    background-color:#24e3be;
+}
+
+
 .create-game-container{
     background-color:white;
     bottom:0px;

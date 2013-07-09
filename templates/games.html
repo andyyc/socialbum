@@ -19,10 +19,60 @@
       {% for game in games %}
       <tr>
         <td>
+          Round {{ game.current_turn.num }}
+        </td>
+        <td>
           <a href="{% url 'game' game.id %}">
             <div class="game-photos">
               {% for user in game.users.all %}
-              <img src="{{ user.facebooksession_set.all.0.picture_url }}" />
+                  <img class="user-image" title="{{ user.first_name }} {{ user.last_name }}" src="{{ user.facebooksession_set.all.0.picture_url }}" />
+              {% endfor %}
+            </div>
+          </a>
+        </td>
+        <td>
+          {% if game.current_turn.status == 0 %}
+            {% if user == game.current_turn.judge %}
+              Choose a topic
+            {% else %}
+              Waiting for next topic
+            {% endif %}
+          {% elif game.current_turn.status == 1 %}
+            {% if user == game.current_turn.judge %}
+              Choose a winner!
+            {% else %}
+              Draw "{{ game.current_turn.game_topic.topic.text }}"
+            {% endif %}
+          {% elif game.current_turn.status == 2 %}
+            {% if user == game.current_turn.judge %}
+              Turn ended
+            {% else %}
+              Turn ended
+            {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Completed Games</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in completed_games %}
+      <tr>
+        <td>
+          Round {{ game.current_turn.num }}
+        </td>
+        <td>
+          <a href="{% url 'game' game.id %}">
+            <div class="game-photos">
+              {% for user in game.users.all %}
+                  <img class="user-image" title="{{ user.first_name }} {{ user.last_name }}" src="{{ user.facebooksession_set.all.0.picture_url }}" />
               {% endfor %}
             </div>
           </a>
@@ -31,4 +81,14 @@
       {% endfor %}
     </tbody>
   </table>
+{% endblock %}
+
+{% block footer_js %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('.user-image').tooltip({
+
+      })
+    });
+  </script>
 {% endblock %}

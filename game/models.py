@@ -6,13 +6,15 @@ class Game(models.Model):
     name = models.CharField(max_length=64)
     users = models.ManyToManyField(User, through="Player")
     current_turn = models.OneToOneField('Turn', related_name="+", null=True)
+    completed = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+    winner = models.OneToOneField('Player', null=True, related_name='+')
 
 class Turn(models.Model):
     STATUSES = (
         (0, 'Choose Topic'),
-        (1, 'Waiting Submissions'),
-        (2, 'Select Winner'),
-        (3, 'Turn End'),
+        (1, 'Waiting Submissions / Select Winner'),
+        (2, 'Turn End'),
     )
 
     game = models.ForeignKey(Game)
@@ -25,6 +27,7 @@ class Turn(models.Model):
 # Create your models here.
 class Topic(models.Model):
     text = models.TextField()
+    deleted = models.BooleanField(default=False)
 
 class GameTopic(models.Model):
     topic = models.ForeignKey(Topic)

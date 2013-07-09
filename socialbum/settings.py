@@ -142,7 +142,7 @@ FACEBOOK_SCOPE = 'email,publish_stream'
 FACEBOOK_REDIRECT_URI = 'http://localhost:8888/facebook/login/'
 FACEBOOK_GRAPH_URI = 'https://graph.facebook.com/'
 
-LOGIN_URL = 'facebook/login'
+LOGIN_URL = '/facebook/login'
 
 AUTHENTICATION_BACKENDS = (
     'facebook.backend.FacebookBackend',

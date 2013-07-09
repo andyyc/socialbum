@@ -14,40 +14,65 @@ Viewing submissions
 
 {% block content %}
   {% if submissions %}
-    <h3>Viewing submissions</h3>
+    <h3>submissions for {{ turn.game_topic.topic.text }}</h3>
     <!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
     <div id="canvasSimpleToolsDivOuter">
-      <div id="myCarousel" class="carousel slide">
+      <div id="drawing-carousel" class="carousel slide">
         <!-- Carousel items -->
         <div class="carousel-inner">
           {% for submission in submissions %}
-          <div class="{% if forloop.first %}active {% endif %}item">
-            <div id="canvasSimpleToolsDiv" name="{{ forloop.counter0 }}">
+            <div class="{% if forloop.first %}active {% endif %}item" name="{{ submission.id }}" {% if turn.winner == submission %}data-winner=true{% endif %}>
+              <div class="canvasSimpleToolsDiv" name="{{ forloop.counter0 }}">
+              </div>
             </div>
-          </div>
           {% endfor %}
         </div>
         <!-- Carousel nav -->
-        <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-        <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
+        <a class="carousel-control left" href="#drawing-carousel" data-slide="prev">&lsaquo;</a>
+        <a class="carousel-control right" href="#drawing-carousel" data-slide="next">&rsaquo;</a>
       </div>
     </div>
+    {% if judge %}
+      <form id="submission-form" class="margin-top" action="{% url 'game' game.id %}" method="post">
+        {% csrf_token %}
+        <div class="hidden">
+          {{ sub_choice_form.submission }}
+        </div>
+        <button id="submit-btn" class="btn btn-primary">Select winner</button>
+      </form>
+    {% endif %}
   {% else %}
-  <h3>Waiting for submissions</h3>
+  <h4>Waiting on submissions for {{ turn.game_topic.topic.text }}</h4>
+  {% endif %}
+  {% if show_turn_nav %}
+  <h3>Turns</h3>
+  <div class="pagination">
+    <ul>
+      {% for turn in turns %}
+      <li>
+        <a href="{% url 'turn' game.id turn.id %}">{{ turn.num }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
   {% endif %}
 {% endblock %}
 
 {% block footer_js %}
+  <script src="{{ STATIC_URL }}js/contacts.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/html5-canvas-drawing-app-simple.js"></script>
   {% if submissions %}
   <script type="text/javascript">
       $(document).ready(function(){
         var submissions = {{ submissions_json|safe }};
-        drawingApp.drawImage(submissions[0]['fields']['clickX'],
-                              submissions[0]['fields']['clickY'],
-                              submissions[0]['fields']['clickColor'],
-                              submissions[0]['fields']['clickSize'],
-                              submissions[0]['fields']['clickDrag']);
+        for(var i=0; i<submissions.length; i++){
+          drawingApp.drawImage(submissions[i]['fields']['clickX'],
+                                submissions[i]['fields']['clickY'],
+                                submissions[i]['fields']['clickColor'],
+                                submissions[i]['fields']['clickSize'],
+                                submissions[i]['fields']['clickDrag'],
+                                i);
+        }
 
         $('.carousel').carousel({
           interval:false
@@ -55,13 +80,4 @@ Viewing submissions
     });
   </script>
   {% endif %}
-{% endblock %}
-
-{% block footer %}
-{% if judge %}
-<form id="submission_form" class="less_toppadded" action="{% url 'game' game.id %}" method="post">
-  {% csrf_token %}
-  <div id="select_btn" class="button">Select</div>
-</form>
-{% endif %}
 {% endblock %}

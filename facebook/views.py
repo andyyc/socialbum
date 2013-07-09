@@ -51,7 +51,7 @@ def login(request):
             if user:
                 if user.is_active:
                     auth.login(request, user)
-                    return HttpResponseRedirect(reverse('home'))
+                    return HttpResponseRedirect(reverse('games'))
                 else:
                     error = 'AUTH_DISABLED'
             else:

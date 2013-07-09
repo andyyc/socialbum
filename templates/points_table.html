@@ -1,19 +1,46 @@
 {% extends "base.html" %}
 
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
 {% block content %}
-<h3>
-  Points Table
-</h3>
-<table id="points_table" class="table table-bordered">
-  {% for p in players %}
-  <tr>
-    <td>
-      {{ p.user.first_name }} {{ p.user.last_name }}
-    </td>
-    <td>
-      {{ p.points }}
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+  {% if game.current_turn.status == 0 %}
+    <p>Waiting for next round to start</p>
+  {% elif game.current_turn.status == 1 %}
+    <h3>Waiting on submissions for {{ game.current_turn.game_topic.topic.text }}</h3>
+  {% endif %}
+
+  <h3>
+    {% if game.completed %}
+      {{ game.winner.user.first_name }} {{  game.winner.user.last_name }} won!
+    {% else %}
+      Current standings {% if prev_turn %}after round {{ prev_turn.num }}{% endif %}
+    {% endif %}
+  </h3>
+  <table id="points_table" class="table table-bordered">
+    {% for p in players %}
+    <tr>
+      <td {% if p == prev_turn.winner.player %}class="winner"{% endif %}>
+        {{ p.user.first_name }} {{ p.user.last_name }}
+      </td>
+      <td {% if p == prev_turn.winner.player %}class="winner"{% endif %}>
+        {{ p.points }}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if turns %}
+  <h3>Previous Turns</h3>
+  <div class="pagination">
+    <ul>
+      {% for turn in turns %}
+      <li>
+        <a href="{% url 'turn' game.id turn.id %}">{{ turn.num }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
 {% endblock %}

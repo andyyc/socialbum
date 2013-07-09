@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
 from game.models import Game, GameTopic, Player, Topic, Turn, Submission
-from game.forms import GameTopicForm, GameForm
+from game.forms import GameTopicForm, GameForm, SubmissionChoiceForm
 from facebook.views import get_friends_list
 from facebook.models import FacebookSession
 
@@ -13,8 +13,10 @@ import json
 
 @login_required
 def games(request):
-    games = Game.objects.filter(users__id=request.user.id)
-    template_context = {'games':games}
+    active_games = Game.objects.filter(users__id=request.user.id).filter(completed=False)
+    completed_games = Game.objects.filter(users__id=request.user.id).filter(completed=True)
+    template_context = {'games':active_games,
+                        'completed_games':completed_games}
     return render_to_response('games.html', template_context, context_instance=RequestContext(request))
 
 @login_required
@@ -36,7 +38,7 @@ def create(request):
                                        points=0)
             
 
-            topics = Topic.objects.all()
+            topics = Topic.objects.filter(deleted=False).order_by('?')
             for topic in topics:
                 game_topic = GameTopic.objects.create(topic=topic,
                                                         game=g)
@@ -70,8 +72,12 @@ def game(request, game_id):
         g = Game.objects.get(id=game_id)
     except Game.DoesNotExist:
         raise Http404
+
+    if g.completed:
+        return show_point_table(request, g)
+
     turn = g.current_turn
-    
+
     if turn.status == 0:
         if turn.judge == request.user:
             return choose_topic(request, g)
@@ -91,9 +97,12 @@ def choose_topic(request, game):
         game_topic_form = GameTopicForm(request.POST)
         if game_topic_form.is_valid():
             #need to check that bc has not been used already
+            game_topic_choices = game.gametopic_set.filter(used=False)[0:3]
+            for game_topic_choice in game_topic_choices:
+                game_topic_choice.used = True
+                game_topic_choice.save()
+
             game_topic = game_topic_form.cleaned_data['game_topic']
-            game_topic.used = True
-            game_topic.save()
             game.current_turn.status = 1
             game.current_turn.game_topic = game_topic
             game.current_turn.save()
@@ -101,7 +110,7 @@ def choose_topic(request, game):
     else:
         game_topic_form = GameTopicForm()
 
-    game_topics = game.gametopic_set.filter(used=False).order_by('?')[0:3]
+    game_topics = game.gametopic_set.filter(used=False)[0:3]
     game_topic_form.fields["game_topic"].queryset = game_topics
     template_context = {'game_topic_form':game_topic_form,
                         'game':game,
@@ -113,37 +122,51 @@ def choose_topic(request, game):
 
 def show_point_table(request, game):
     players = game.player_set.all()
-    template_context = {'players':players}
+    turns = game.turn_set.filter(status=2)
+
+    if turns:
+        prev_turn = turns.reverse()[0]
+    else:
+        prev_turn = None
+
+    template_context = {'players':players,
+                        'turns':turns,
+                        'prev_turn':prev_turn,
+                        'game':game}
     return render_to_response('points_table.html',
                               template_context,
                               context_instance=RequestContext(request)) 
 
 def pick_winner(request, game):
-    return show_submissions(request, game, judge=True)
-    """
+    is_judge = game.current_turn.judge == request.user
+    sub_choice_form = None
     submissions = Submission.objects.filter(turn=game.current_turn)
-    if request.method == 'POST':
-        scf = SubmissionChoiceForm(request.POST)
-        if scf.is_valid():
-            sc = scf.cleaned_data['submission']
-            game.current_turn.winner = sc
-            game.current_turn.status = 2
-            game.current_turn.save()
-            p = Player.objects.get(game=game, user=sc.player.user)
-            p.points += 1
-            p.save()
-            #start next turn
-            start_new_turn(request, game)
-            return show_point_table(request, game)
-    else:
-        scf = SubmissionChoiceForm()
 
-    scf.fields["submission"].queryset = submissions
-    template_context = {'scf':scf, 'game':game}
-    return render_to_response('pick_winner.html',
-                              template_context,
-                              context_instance=RequestContext(request))
-    """
+    if is_judge:
+        if request.method == 'POST':
+            sub_choice_form = SubmissionChoiceForm(request.POST)
+            if sub_choice_form.is_valid():
+                submission = sub_choice_form.cleaned_data['submission']
+                game.current_turn.winner = submission
+                game.current_turn.status = 2
+                game.current_turn.save()
+                player = submission.player
+                player.points += 1
+                player.save()
+
+                if player.points == 6:
+                    game.completed = True
+                    game.winner = player
+                    game.save()
+                else:
+                    start_new_turn(request, game)
+
+                return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
+        else:
+            sub_choice_form = SubmissionChoiceForm()
+
+        sub_choice_form.fields["submission"].queryset = submissions
+    return show_submissions(request, game, is_judge, sub_choice_form)
 
 
 def start_new_turn(request, game):
@@ -158,35 +181,63 @@ def start_new_turn(request, game):
     game.save()
 
 @login_required
-def show_submissions(request, game):
+def show_submissions(request, game, is_judge=False, sub_choice_form=None):
     # should check to see if user is judge
-    is_judge = game.current_turn.judge == request.user
     submissions = Submission.objects.filter(turn=game.current_turn)
+
+    if not submissions.exists():
+        return show_point_table(request, game)
 
     from django.core import serializers
     submissions_json = serializers.serialize('json',
                                             submissions,
                                             fields=('id', 'clickX', 'clickY', 'clickDrag', 'clickSize', 'clickColor'))
 
-    """
-    if is_judge:
-        if request.method == 'POST':
-            if submission != None:
-                game.current_turn.winner = submission
-                game.current_turn.status = 2
-                game.current_turn.save()
-                p = submission.player
-                p.points += 1
-                p.save()
-                #start next turn
-                start_new_turn(request, game)
-                return show_point_table(request, game)
-    """
-
     template_context = {'judge':is_judge,
                         'game':game,
+                        'turn':game.current_turn,
                         'submissions':submissions,
-                        'submissions_json':submissions_json}
+                        'submissions_json':submissions_json,
+                        'sub_choice_form':sub_choice_form}
+
+    return render_to_response('submissions.html',
+                              template_context,
+                              context_instance=RequestContext(request))
+
+def turn(request, game_id, turn_id):
+    # should check to see if user is judge
+    try:
+        turn = Turn.objects.get(id=turn_id)
+    except Turn.DoesNotExist:
+        raise Http404
+
+    try:
+        game = Game.objects.get(id=game_id)
+    except Game.DoesNotExist:
+        raise Http404
+
+
+    if turn == game.current_turn and turn.status != 2:
+        return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
+
+
+    submissions = Submission.objects.filter(turn=turn)
+
+    from django.core import serializers
+    submissions_json = serializers.serialize('json',
+                                            submissions,
+                                            fields=('id', 'clickX', 'clickY', 'clickDrag', 'clickSize', 'clickColor'))
+
+    turns = game.turn_set.all()
+
+    template_context = {'judge':False,
+                        'game':game,
+                        'turn':turn,
+                        'submissions':submissions,
+                        'submissions_json':submissions_json,
+                        'show_turn_nav':True,
+                        'turns':turns}
+
     return render_to_response('submissions.html',
                               template_context,
                               context_instance=RequestContext(request))

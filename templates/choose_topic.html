@@ -9,9 +9,9 @@ Choose a topic
 {% endblock %}
 
 {% block content %}
-  <h3>Choose a topic</h3>
+  <h3>Round {{ game.current_turn.num }}: Choose a topic</h3>
 {% if game_topic_form.game_topic.errors %}
-Pick a topic foo!
+Error selecting topic
 {% endif %}
 <form id="topic-form" action="{% url 'game' game.id %}" method="post">
   {% csrf_token %}

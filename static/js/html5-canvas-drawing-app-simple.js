@@ -51,13 +51,16 @@ var drawingApp = (function(){
     var curSize_simpleTools = "normal";
     var mouseDown = 0;
 
-    function createCanvas(){
+    function createCanvas(submission_idx){
+
+        submission_idx = (typeof submission_idx === "undefined") ? 0 : submission_idx;
         // Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
-        var canvasDiv = document.getElementById('canvasSimpleToolsDiv');
+        //var canvasDiv = document.getElementById('canvasSimpleToolsDiv');
+        var canvasDiv = $('.canvasSimpleToolsDiv[name=' + submission_idx + ']')[0];
         canvas_simpleTools = document.createElement('canvas');
         canvas_simpleTools.setAttribute('width', canvasWidth);
         canvas_simpleTools.setAttribute('height', canvasHeight);
-        canvas_simpleTools.setAttribute('id', 'canvasSimpleTools');
+        canvas_simpleTools.setAttribute('class', 'canvasSimpleTools');
         canvasDiv.appendChild(canvas_simpleTools);
         if(typeof G_vmlCanvasManager != 'undefined') {
             canvas_simpleTools = G_vmlCanvasManager.initElement(canvas_simpleTools);
@@ -124,17 +127,17 @@ var drawingApp = (function(){
             paint_simpleTools = false;
         }
 
-        $('#canvasSimpleToolsDiv').mousedown(mousePress);
-        $('#canvasSimpleToolsDiv').mousemove(mouseDrag);
-        $('#canvasSimpleToolsDiv').mouseup(release);
-        $('#canvasSimpleToolsDiv').mouseleave(cancel);
+        $('.canvasSimpleToolsDiv').mousedown(mousePress);
+        $('.canvasSimpleToolsDiv').mousemove(mouseDrag);
+        $('.canvasSimpleToolsDiv').mouseup(release);
+        $('.canvasSimpleToolsDiv').mouseleave(cancel);
 
-        $('#canvasSimpleToolsDiv').bind('touchstart', touchPress);
-        $('#canvasSimpleToolsDiv').bind('touchmove', touchDrag);
-        $('#canvasSimpleToolsDiv').bind('touchend', release);
-        $('#canvasSimpleToolsDiv').bind('touchcancel', cancel);
+        $('.canvasSimpleToolsDiv').bind('touchstart', touchPress);
+        $('.canvasSimpleToolsDiv').bind('touchmove', touchDrag);
+        $('.canvasSimpleToolsDiv').bind('touchend', release);
+        $('.canvasSimpleToolsDiv').bind('touchcancel', cancel);
 
-        $('#canvasSimpleToolsDiv').mouseenter(function(e){
+        $('.canvasSimpleToolsDiv').mouseenter(function(e){
 
             if(mouseDown){
                 paint_simpleTools = true;
@@ -267,12 +270,18 @@ var drawingApp = (function(){
             }
 
             context_simpleTools.beginPath();
-            if(clickDrag_simpleTools[i] && i){
+            console.log(clickX_simpleTools[i]);
+            console.log(clickY_simpleTools[i]);
+
+            if(clickDrag_simpleTools[i] != 'false' && i){
+                console.log("a");
                 context_simpleTools.moveTo(clickX_simpleTools[i-1], clickY_simpleTools[i-1]);
             }else{
-                context_simpleTools.moveTo(clickX_simpleTools[i], clickY_simpleTools[i]);
+                console.log("b");
+                console.log(parseInt(clickX_simpleTools[i]));
+                context_simpleTools.moveTo(parseInt(clickX_simpleTools[i])-1, parseInt(clickY_simpleTools[i]));
             }
-            context_simpleTools.lineTo(clickX_simpleTools[i], clickY_simpleTools[i]);
+            context_simpleTools.lineTo(parseInt(clickX_simpleTools[i]), parseInt(clickY_simpleTools[i]));
             context_simpleTools.closePath();
             context_simpleTools.strokeStyle = clickColor_simpleTools[i];
             context_simpleTools.lineWidth = radius;
@@ -280,13 +289,13 @@ var drawingApp = (function(){
         }
     }
 
-    var drawImage = function(clickX, clickY, clickColor, clickSize, clickDrag) {
+    var drawImage = function(clickX, clickY, clickColor, clickSize, clickDrag, submission_idx) {
         clickX_simpleTools = clickX.split(",");
         clickY_simpleTools = clickY.split(",");
         clickColor_simpleTools = clickColor.split(",");
         clickSize_simpleTools = clickSize.split(",");
         clickDrag_simpleTools = clickDrag.split(",");
-        createCanvas();
+        createCanvas(submission_idx);
         redrawSimpleTools();
     };
 
