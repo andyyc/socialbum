@@ -49,9 +49,15 @@ Viewing submissions
   <div class="pagination">
     <ul>
       {% for turn in turns %}
-      <li>
-        <a href="{% url 'turn' game.id turn.id %}">{{ turn.num }}</a>
-      </li>
+        {% if not forloop.last %}
+          <li>
+            <a href="{% url 'turn' game.id turn.id %}">{{ turn.num }}</a>
+          </li>
+        {% else %}
+          <li>
+            <a href="{% url 'turn' game.id turn.id %}">Current</a>
+          </li>
+        {% endif %}
       {% endfor %}
     </ul>
   </div>

@@ -26,11 +26,5 @@ $(document).ready(function(){
         game_topic_checkbox.prop("checked", true);
     });
 
-    $('#submission-form').submit(function(){
-        var sub_id = $("#drawing-carousel div.active").attr('name');
-        var checkbox = $(this).find('input[name=submission][value=' + sub_id + ']');
-        checkbox.prop("checked", true);
-        return true;
-    });
 
 });

@@ -9,28 +9,27 @@
     <a class="btn btn-block btn-info" href="{% url 'create_game' %}">Start a new game</a>
   </div>
 
-  <table class="table table-bordered table-hover">
+  <table class="table table-bordered table-hover games-table">
     <thead>
       <tr>
-        <th>Current Games</th>
+        <th>Rd</th>
+        </th><th colspan="2">Current Games</th>
       </tr>
     </thead>
     <tbody>
       {% for game in games %}
-      <tr>
-        <td>
-          Round {{ game.current_turn.num }}
+      <tr class="games-table-row" url="{% url 'game' game.id %}">
+        <td class="round-col">
+          {{ game.current_turn.num }}
         </td>
-        <td>
-          <a href="{% url 'game' game.id %}">
+        <td class="players-col">
             <div class="game-photos">
               {% for user in game.users.all %}
-                  <img class="user-image" title="{{ user.first_name }} {{ user.last_name }}" src="{{ user.facebooksession_set.all.0.picture_url }}" />
+                  <img class="user-image" width="20" title="{{ user.first_name }} {{ user.last_name }}" src="{{ user.facebooksession_set.all.0.picture_url }}" />
               {% endfor %}
             </div>
-          </a>
         </td>
-        <td>
+        <td class="game-status-col">
           {% if game.current_turn.status == 0 %}
             {% if user == game.current_turn.judge %}
               Choose a topic
@@ -56,26 +55,30 @@
     </tbody>
   </table>
 
-  <table class="table table-bordered table-hover">
+  <table class="table table-bordered table-hover games-table">
     <thead>
       <tr>
-        <th>Completed Games</th>
+        <th>Rd</th>
+        <th colspan="2">Completed Games</th>
       </tr>
     </thead>
     <tbody>
       {% for game in completed_games %}
-      <tr>
-        <td>
-          Round {{ game.current_turn.num }}
+      <tr class="games-table-row" url="{% url 'game' game.id %}">
+        <td class="round-col">
+          {{ game.current_turn.num }}
         </td>
-        <td>
+        <td class="players-col">
           <a href="{% url 'game' game.id %}">
             <div class="game-photos">
               {% for user in game.users.all %}
-                  <img class="user-image" title="{{ user.first_name }} {{ user.last_name }}" src="{{ user.facebooksession_set.all.0.picture_url }}" />
+                  <img class="user-image" width="20" title="{{ user.first_name }} {{ user.last_name }}" src="{{ user.facebooksession_set.all.0.picture_url }}" />
               {% endfor %}
             </div>
           </a>
+        </td>
+        <td>
+          {{ game.winner.user.first_name }} {{ game.winner.user.last_name }}  won!
         </td>
       </tr>
       {% endfor %}
@@ -89,6 +92,13 @@
       $('.user-image').tooltip({
 
       })
+
+    $('.games-table tbody tr.games-table-row').click(function(){
+        var url = $(this).attr('url');
+        if(url) {
+          window.location = url;
+        }
+      });
     });
   </script>
 {% endblock %}

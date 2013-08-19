@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}Drawpples{%  endblock %}</title>
+    <title>{% block title %}Draw with pals{%  endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -15,8 +15,7 @@
     {% endblock %}
     <style type="text/css">
       body {
-        padding-top: 60px;
-        padding-bottom: 40px;
+        padding-top:60px;
       }
 
       @media (max-width: 980px) {
@@ -54,7 +53,7 @@
   </head>
 
   <body>
-
+    {% block header %}
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
@@ -65,7 +64,7 @@
             <span class="icon-bar"></span>
           </button>
           -->
-          <a class="brand" href="{% url 'games' %}">Drawpples</a>
+          <a class="brand" href="{% url 'games' %}">Draw with pals</a>
           <div>
             {% if user.is_authenticated %}
                 <ul class="nav pull-right">
@@ -84,6 +83,7 @@
         </div>
       </div>
     </div>
+    {% endblock %}
 
     <div class="container-fluid middle-container">
       <div class="row-fluid">

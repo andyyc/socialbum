@@ -85,7 +85,11 @@ def game(request, game_id):
             return show_point_table(request, g)
     elif turn.status == 1:
         if turn.judge == request.user:
-            return pick_winner(request, g)
+            return HttpResponseRedirect(reverse('submission', kwargs={
+                'game_id':game_id,
+                'turn_id':g.current_turn.id,
+                'page':0,
+            }))
         else:
             return draw(request, g)
     else:
@@ -125,7 +129,7 @@ def show_point_table(request, game):
     turns = game.turn_set.filter(status=2)
 
     if turns:
-        prev_turn = turns.reverse()[0]
+        prev_turn = turns.order_by('id').reverse()[0]
     else:
         prev_turn = None
 
@@ -153,8 +157,10 @@ def pick_winner(request, game):
                 player = submission.player
                 player.points += 1
                 player.save()
-
-                if player.points == 6:
+                print "break"
+                print player.id
+                if player.points >= 3:
+                    print "winner"
                     game.completed = True
                     game.winner = player
                     game.save()
@@ -166,6 +172,7 @@ def pick_winner(request, game):
             sub_choice_form = SubmissionChoiceForm()
 
         sub_choice_form.fields["submission"].queryset = submissions
+
     return show_submissions(request, game, is_judge, sub_choice_form)
 
 
@@ -205,42 +212,127 @@ def show_submissions(request, game, is_judge=False, sub_choice_form=None):
                               context_instance=RequestContext(request))
 
 def turn(request, game_id, turn_id):
-    # should check to see if user is judge
-    try:
-        turn = Turn.objects.get(id=turn_id)
-    except Turn.DoesNotExist:
-        raise Http404
 
     try:
         game = Game.objects.get(id=game_id)
-    except Game.DoesNotExist:
+    except:
         raise Http404
 
+    try:
+        turn = Turn.objects.get(id=turn_id)
+    except:
+        raise Http404
 
-    if turn == game.current_turn and turn.status != 2:
-        return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
+    if turn == game.current_turn and not game.completed:
+        return HttpResponseRedirect(reverse('game', kwargs={'game_id':game_id}))
 
+    return submission(request, game_id, turn_id, 0)
 
-    submissions = Submission.objects.filter(turn=turn)
+@login_required
+def submission(request, game_id, turn_id=None, page=0):
+
+    page = int(page)
+
+    try:
+        game = Game.objects.get(id=game_id)
+    except:
+        raise Http404
+
+    if not turn_id:
+        turn = game.current_turn
+    else:
+        try:
+            turn = Turn.objects.get(id=turn_id)
+        except:
+            raise Http404
+
+    submissions = turn.submission_set.all()
+
+    if not submissions:
+        return show_point_table(request, game)
+
+    try:
+        submission = submissions[page]
+    except:
+        raise Http404
+
+    is_judge = turn.judge == request.user and turn == game.current_turn and turn.status == 1
+    sub_choice_form = None
+
+    if is_judge:
+        if request.method == 'POST':
+            sub_choice_form = SubmissionChoiceForm(request.POST)
+            sub_choice_form.fields["submission"].queryset = submissions
+
+            if sub_choice_form.is_valid():
+                submission = sub_choice_form.cleaned_data['submission']
+                game.current_turn.winner = submission
+                game.current_turn.status = 2
+                game.current_turn.save()
+                player = submission.player
+                player.points += 1
+                player.save()
+
+                if player.points == 4:
+                    game.completed = True
+                    game.winner = player
+                    game.save()
+                else:
+                    start_new_turn(request, game)
+
+                return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
+        else:
+            sub_choice_form = SubmissionChoiceForm(initial={
+                'submission':submission,
+            })
+
+        sub_choice_form.fields["submission"].queryset = submissions
+
+    prev = None
+    has_prev = False
+
+    if page > 0:
+        prev = page-1
+        has_prev = True
+
+    next = None
+    has_next = False
+
+    if page < len(submissions)-1:
+        next = page+1
+        has_next = True
+
 
     from django.core import serializers
-    submissions_json = serializers.serialize('json',
-                                            submissions,
+    submission_json = serializers.serialize('json',
+                                            [submission,],
                                             fields=('id', 'clickX', 'clickY', 'clickDrag', 'clickSize', 'clickColor'))
+
+    show_turn_nav = True
+    #force user to make selection, no browsing
+    if turn == game.current_turn and turn.status != 2 and request.user == game.current_turn.judge:
+        show_turn_nav = False
 
     turns = game.turn_set.all()
 
-    template_context = {'judge':False,
+    template_context = {'judge':is_judge,
                         'game':game,
                         'turn':turn,
-                        'submissions':submissions,
-                        'submissions_json':submissions_json,
-                        'show_turn_nav':True,
-                        'turns':turns}
+                        'submission':submission,
+                        'submission_json':submission_json,
+                        'show_turn_nav':show_turn_nav,
+                        'turns':turns,
+                        'prev':prev,
+                        'next':next,
+                        'has_next':has_next,
+                        'has_prev':has_prev,
+                        'sub_choice_form':sub_choice_form,
+                        'page':page,
+                        }
 
-    return render_to_response('submissions.html',
-                              template_context,
-                              context_instance=RequestContext(request))
+    return render_to_response('submission.html',
+                          template_context,
+                          context_instance=RequestContext(request))
 
 @login_required
 def draw(request, game):
@@ -257,7 +349,7 @@ def draw(request, game):
         submitted = False
 
     if submitted:
-        return show_submissions(request, game)
+        return submission(request, game.id, game.current_turn.id)
 
     submit_error = False
     if request.method == 'POST':

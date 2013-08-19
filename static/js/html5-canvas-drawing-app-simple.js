@@ -270,15 +270,10 @@ var drawingApp = (function(){
             }
 
             context_simpleTools.beginPath();
-            console.log(clickX_simpleTools[i]);
-            console.log(clickY_simpleTools[i]);
 
             if(clickDrag_simpleTools[i] != 'false' && i){
-                console.log("a");
                 context_simpleTools.moveTo(clickX_simpleTools[i-1], clickY_simpleTools[i-1]);
             }else{
-                console.log("b");
-                console.log(parseInt(clickX_simpleTools[i]));
                 context_simpleTools.moveTo(parseInt(clickX_simpleTools[i])-1, parseInt(clickY_simpleTools[i]));
             }
             context_simpleTools.lineTo(parseInt(clickX_simpleTools[i]), parseInt(clickY_simpleTools[i]));

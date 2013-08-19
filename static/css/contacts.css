@@ -71,6 +71,7 @@
 #canvasSimpleToolsDivOuter{
   border:2px solid #eee;
   display:inline-block;
+  margin-left:-20px;
 }
 
 .canvasSimpleToolsDiv{
@@ -91,4 +92,29 @@
 .carousel-control{
     top:50%;
     opacity:0.2;
+}
+
+
+.games-table .round-col{
+    width:20px;
+}
+
+.games-table .players-col{
+    width:120px;
+}
+
+.games-table tbody tr.games-table-row{
+    cursor:pointer;
+}
+
+.screen-width {
+    width:320px;
+}
+
+#submission-form {
+    display:inline;
+}
+
+#draw-form {
+    display:inline-block;
 }

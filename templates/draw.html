@@ -17,8 +17,11 @@
 <script type="text/javascript" src="{{ STATIC_URL }}js/html5-canvas-drawing-app-simple.js"></script>
 {% endblock %}
 
+{% block header %}
+{% endblock %}
+
 {% block content %}
-<p>You are drawing {{ game.current_turn.game_topic.topic.text }}</p>
+<p>{{ game.current_turn.game_topic.topic.text }}</p>
 <!--[if IE]><script type="text/javascript" src="{{ STATIC_URL }}js/excanvas.js"></script><![endif]-->
 <div class="btn-toolbar">
   <div class="btn-group">
@@ -56,17 +59,16 @@
     <a class="btn" href="#" id="chooseEraserSimpleTools">E</a>
     <a class="btn" href="#" id="clearCanvasSimpleTools"><i class="icon-trash"></i></a>
   </div>
+  <form id="draw-form" class="margin-left" action="{% url 'game' game.id %}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="clickX" value="">
+      <input type="hidden" name="clickY" value="">
+      <input type="hidden" name="clickColor" value="">
+      <input type="hidden" name="clickDrag" value="">
+      <input type="hidden" name="clickSize" value="">
+      <button id="submit-btn" class="btn btn-primary btn-small">Submit</button>
+  </form>
 </div>
-
-<form id="draw-form" action="{% url 'game' game.id %}" method="post">
-  {% csrf_token %}
-  <input type="hidden" name="clickX" value="">
-  <input type="hidden" name="clickY" value="">
-  <input type="hidden" name="clickColor" value="">
-  <input type="hidden" name="clickDrag" value="">
-  <input type="hidden" name="clickSize" value="">
-  <button id="submit-btn" class="btn btn-primary">Submit Drawing</button>
-</form>
 {% endblock %}
 
 

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block header_css %}
+  <link href="{{ STATIC_URL }}css/contacts.css?v=2" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block header_js %}
+{% endblock %}
+
+{% block title %}
+Viewing submissions
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+
+{% block content %}
+  {% if submission %}
+    <h5>{{ turn.game_topic.topic.text }}</h5>
+    <!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+    <div id="canvasSimpleToolsDivOuter">
+      <div class="canvasSimpleToolsDiv" name="0">
+      </div>
+    </div>
+
+    <ul class="pager">
+      <li class="previous {% if not has_prev %}disabled{% endif %}">
+        <a href="{% if has_prev %}{% url 'submission' game.id turn.id prev %}{% endif %}">Prev</a>
+      </li>
+      <li>
+        {% if judge %}
+          <form id="submission-form" class="margin-top" action="{% url 'submission' game.id turn.id page %}" method="post">
+            {% csrf_token %}
+            <div class="hidden">
+              {{ sub_choice_form.submission }}
+            </div>
+            <button id="submit-btn" class="btn btn-small btn-primary">Select winner</button>
+          </form>
+        {% endif %}
+      </li>
+      <li class="next {% if not has_next %}disabled{% endif %}">
+        <a href="{% if has_next %}{% url 'submission' game.id turn.id next %}{% endif %}">Next</a>
+      </li>
+    </ul>
+  {% else %}
+  <h4>Waiting on submissions for {{ turn.game_topic.topic.text }}</h4>
+  {% endif %}
+  {% if show_turn_nav %}
+  <div class="pagination">
+    <ul class="valign-middle">
+      <li class=""><a href="{% url 'games' %}">Home</a></li>
+      {% for turn in turns %}
+        {% if not game.current_turn == turn or turn.status == 2 %}
+          <li>
+            <a href="{% url 'turn' game.id turn.id %}">{{ turn.num }}</a>
+          </li>
+        {% else %}
+          <li>
+            <a href="{% url 'turn' game.id turn.id %}">Current</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block footer_js %}
+  <script src="{{ STATIC_URL }}js/contacts.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/html5-canvas-drawing-app-simple.js"></script>
+  {% if submission %}
+  <script type="text/javascript">
+      $(document).ready(function(){
+        var submission = null;
+        submission = {{ submission_json|safe }};
+        drawingApp.drawImage(submission[0]['fields']['clickX'],
+                              submission[0]['fields']['clickY'],
+                              submission[0]['fields']['clickColor'],
+                              submission[0]['fields']['clickSize'],
+                              submission[0]['fields']['clickDrag'],
+                              0);
+
+    });
+  </script>
+  {% endif %}
+{% endblock %}

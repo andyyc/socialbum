@@ -4,20 +4,23 @@
   <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
 {% endblock %}
 
+{% block header %}
+{% endblock %}
+
 {% block content %}
   {% if game.current_turn.status == 0 %}
-    <p>Waiting for next round to start</p>
+    <p>Waiting for {{ game.current_turn.judge.first_name }} {{ game.current_turn.judge.last_name }} to start next round</p>
   {% elif game.current_turn.status == 1 %}
-    <h3>Waiting on submissions for {{ game.current_turn.game_topic.topic.text }}</h3>
+    <h5>Waiting on submissions for {{ game.current_turn.game_topic.topic.text }}</h5>
   {% endif %}
 
-  <h3>
+  <h5>
     {% if game.completed %}
       {{ game.winner.user.first_name }} {{  game.winner.user.last_name }} won!
     {% else %}
       Current standings {% if prev_turn %}after round {{ prev_turn.num }}{% endif %}
     {% endif %}
-  </h3>
+  </h5>
   <table id="points_table" class="table table-bordered">
     {% for p in players %}
     <tr>
@@ -31,9 +34,10 @@
     {% endfor %}
   </table>
   {% if turns %}
-  <h3>Previous Turns</h3>
+  <h5>Previous Turns</h5>
   <div class="pagination">
     <ul>
+      <li class=""><a href="{% url 'games' %}">Home</a></li>
       {% for turn in turns %}
       <li>
         <a href="{% url 'turn' game.id turn.id %}">{{ turn.num }}</a>

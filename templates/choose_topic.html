@@ -9,7 +9,7 @@ Choose a topic
 {% endblock %}
 
 {% block content %}
-  <h3>Round {{ game.current_turn.num }}: Choose a topic</h3>
+  <p>Round {{ game.current_turn.num }}: Choose a topic</p>
 {% if game_topic_form.game_topic.errors %}
 Error selecting topic
 {% endif %}
