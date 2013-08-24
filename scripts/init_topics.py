@@ -10,6 +10,13 @@ from game.models import Topic
 #for i in xrange(0,20):
 #    Topic.objects.create(text="topic" + str(i))
 
+f = open('topics.txt', 'r')
+
+for topic in f:
+    Topic.objects.create(text=topic.strip())
+
+
+"""
 Topic.objects.create(text="Why can't I sleep at night?")
 Topic.objects.create(text="What's that smell?")
 Topic.objects.create(text="I got 99 problems but ___ ain't one")
@@ -40,3 +47,4 @@ Topic.objects.create(text="Crystal meth")
 Topic.objects.create(text="College")
 Topic.objects.create(text="Flying sex snakes")
 Topic.objects.create(text="Being a motherfucking sorcerer")
+"""

@@ -45,6 +45,12 @@
       {% endfor %}
     </ul>
   </div>
+  {% else %}
+  <div class="pagination">
+    <ul>
+      <li class=""><a href="{% url 'games' %}">Home</a></li>
+    </ul>
+  </div>
   {% endif %}
 
 {% endblock %}

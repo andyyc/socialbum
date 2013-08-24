@@ -44,7 +44,7 @@ def create(request):
                                                         game=g)
             #create turn
             turn = Turn.objects.create(game=g,
-                                       num=0,
+                                       num=1,
                                        judge=request.user)
             g.current_turn = turn
             g.save()
@@ -100,13 +100,16 @@ def choose_topic(request, game):
     if request.method == 'POST':
         game_topic_form = GameTopicForm(request.POST)
         if game_topic_form.is_valid():
-            #need to check that bc has not been used already
+            #need to check that game topic has not been used already
+            """
             game_topic_choices = game.gametopic_set.filter(used=False)[0:3]
             for game_topic_choice in game_topic_choices:
                 game_topic_choice.used = True
                 game_topic_choice.save()
+            """
 
             game_topic = game_topic_form.cleaned_data['game_topic']
+            game_topic.used = False
             game.current_turn.status = 1
             game.current_turn.game_topic = game_topic
             game.current_turn.save()
@@ -114,7 +117,8 @@ def choose_topic(request, game):
     else:
         game_topic_form = GameTopicForm()
 
-    game_topics = game.gametopic_set.filter(used=False)[0:3]
+    game_topics = game.gametopic_set.filter(used=False).order_by('?')
+    game_topics = game_topics[0:3]
     game_topic_form.fields["game_topic"].queryset = game_topics
     template_context = {'game_topic_form':game_topic_form,
                         'game':game,
