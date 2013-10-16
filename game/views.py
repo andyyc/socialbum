@@ -161,10 +161,7 @@ def pick_winner(request, game):
                 player = submission.player
                 player.points += 1
                 player.save()
-                print "break"
-                print player.id
                 if player.points >= 3:
-                    print "winner"
                     game.completed = True
                     game.winner = player
                     game.save()

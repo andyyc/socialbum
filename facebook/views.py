@@ -91,7 +91,6 @@ def get_friends_list(fb_profile):
     only_fb_friends_list = []
     user_friends_list = []
     user_friends_fb_id_list = []
-    print fb_friends_list
     for fb_friend in fb_friends_list:
         fb_friend['picture_url'] = graph.request_url(fb_friend['id'] + '/picture')
         try:
