@@ -15,7 +15,7 @@ DATABASES = {
         'NAME': 'dev_socialbum',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'root',
-        'PASSWORD': 'asdfawef',
+        'PASSWORD': 'sclbm11',
         'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
@@ -73,6 +73,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     '/vagrant/app/static',
+    '/home/ubuntu/web/socialbum/static'
 )
 
 # List of finder classes that know how to find static files in
@@ -113,6 +114,7 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     '/vagrant/app/templates',
+    '/home/ubuntu/web/socialbum/templates'
 )
 
 INSTALLED_APPS = (
@@ -139,7 +141,7 @@ INSTALLED_APPS = (
 FACEBOOK_APP_ID = '596137767071762'
 FACEBOOK_APP_SECRET = '41c7c571cac7e8b2d5cccf631107a347'
 FACEBOOK_SCOPE = 'email,publish_stream'
-FACEBOOK_REDIRECT_URI = 'http://localhost:8888/facebook/login/'
+FACEBOOK_REDIRECT_URI = 'http://ec2-50-18-24-221.us-west-1.compute.amazonaws.com/facebook/login/'
 FACEBOOK_GRAPH_URI = 'https://graph.facebook.com/'
 
 LOGIN_URL = '/facebook/login'
