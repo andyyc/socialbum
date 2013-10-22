@@ -141,7 +141,7 @@ INSTALLED_APPS = (
 FACEBOOK_APP_ID = '596137767071762'
 FACEBOOK_APP_SECRET = '41c7c571cac7e8b2d5cccf631107a347'
 FACEBOOK_SCOPE = 'email,publish_stream'
-FACEBOOK_REDIRECT_URI = 'http://ec2-50-18-24-221.us-west-1.compute.amazonaws.com/facebook/login/'
+FACEBOOK_REDIRECT_URI = 'http://paintsparty.com/facebook/login/'
 FACEBOOK_GRAPH_URI = 'https://graph.facebook.com/'
 
 LOGIN_URL = '/facebook/login'
