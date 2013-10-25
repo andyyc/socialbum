@@ -115,7 +115,7 @@ def choose_topic(request, game):
             game.current_turn.save()
             return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
         else:
-            print game_topic_form.game_topic.error_messages
+            print game_topic_form.errors
     else:
         game_topic_form = GameTopicForm()
 
