@@ -10,7 +10,7 @@ class GameTopicChoiceField(forms.ModelChoiceField):
         return obj.topic.text
 
 class GameTopicForm(forms.Form):
-    game_topic = GameTopicChoiceField(widget=forms.RadioSelect(),required=True,empty_label=None,queryset=GameTopic.objects.all())
+    game_topic = forms.IntegerField(widget=forms.HiddenInput,required=True)
 
 class SubmissionChoiceForm(forms.Form):
     submission = forms.ModelChoiceField(widget=forms.RadioSelect(), required=True,empty_label=None,queryset=Submission.objects.all())

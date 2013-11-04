@@ -4,9 +4,6 @@
   <link href="{{ STATIC_URL }}css/contacts.css" rel="stylesheet" type="text/css">
 {% endblock %}
 
-{% block header %}
-{% endblock %}
-
 {% block content %}
   {% if game.current_turn.status == 0 %}
     <p>Waiting for {{ game.current_turn.judge.first_name }} {{ game.current_turn.judge.last_name }} to start next round</p>

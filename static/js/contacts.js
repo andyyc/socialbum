@@ -18,12 +18,12 @@ $(document).ready(function(){
 
     $('.topic-cell').click(function(){
         var game_topic_id = $(this).attr('name');
-        var game_topic_checkbox = $('input[name="game_topic"]' + '[value=' + game_topic_id + ']');
+        var game_topic_input = $('#id_game_topic');
 
         $('#topic-btn').removeAttr('disabled');
         $('.topic-cell').removeClass('selected');
         $(this).addClass('selected');
-        game_topic_checkbox.prop("checked", true);
+        game_topic_input.val(game_topic_id);
     });
 
 

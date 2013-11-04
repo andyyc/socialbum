@@ -11,8 +11,11 @@ from facebook.models import FacebookSession
 
 import json
 
+NUM_TOPIC_CHOICES = 3
+
 @login_required
 def games(request):
+    print request.user
     active_games = Game.objects.filter(users__id=request.user.id).filter(completed=False)
     completed_games = Game.objects.filter(users__id=request.user.id).filter(completed=True)
     template_context = {'games':active_games,
@@ -96,7 +99,10 @@ def game(request, game_id):
         start_new_turn(request=request, game=g)
         return game(request, game_id)
 
+@login_required
 def choose_topic(request, game):
+    #check that person making request is the current turn's judge
+
     if request.method == 'POST':
         game_topic_form = GameTopicForm(request.POST)
         if game_topic_form.is_valid():
@@ -108,27 +114,49 @@ def choose_topic(request, game):
                 game_topic_choice.save()
             """
 
-            game_topic = game_topic_form.cleaned_data['game_topic']
-            game_topic.used = False
-            game.current_turn.status = 1
-            game.current_turn.game_topic = game_topic
-            game.current_turn.save()
-            return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
-        else:
-            print game_topic_form.errors
+            game_topic_id = game_topic_form.cleaned_data['game_topic']
+            try:
+                game_topic = GameTopic.objects.get(id=game_topic_id)
+            except GameTopic.DoesNotExist:
+                game_topic = None
+
+            if game_topic:
+                game_topic.used = True
+                game_topic.save()
+                game.current_turn.status = 1
+                game.current_turn.game_topic = game_topic
+                game.current_turn.save()
+                return HttpResponseRedirect(reverse('game', kwargs={'game_id':game.id}))
     else:
         game_topic_form = GameTopicForm()
 
-    game_topics = game.gametopic_set.filter(used=False).order_by('?')
-    game_topics = game_topics[0:3]
-    game_topic_form.fields["game_topic"].queryset = game_topics
+    game_topics = game.gametopic_set.filter(used=False)
+    selected_game_topics = select_three_random(game.current_turn.num, list(game_topics))
     template_context = {'game_topic_form':game_topic_form,
                         'game':game,
-                        'game_topics':game_topics}
+                        'game_topics':selected_game_topics}
 
     return render_to_response('choose_topic.html',
                               template_context,
                               context_instance=RequestContext(request)) 
+
+#This function takes a turn number and a list of game topics and return three "random" topics
+#Random meaning the results will be different for each turn number, but the same for a given number
+def select_three_random(turn_num, game_topics):
+    num_game_topics = len(game_topics)
+
+    if num_game_topics < NUM_TOPIC_CHOICES :
+        return game_topics
+
+    selected_game_topics = []
+    for i in xrange(0,NUM_TOPIC_CHOICES):
+        idx = some_hash(turn_num + i, num_game_topics-i)
+        selected_game_topics.append(game_topics[idx])
+        game_topics[idx] = game_topics[num_game_topics - i - 1]
+    return selected_game_topics
+
+def some_hash(num, buckets):
+    return num*2654435761 % buckets;
 
 def show_point_table(request, game):
     players = game.player_set.all()
