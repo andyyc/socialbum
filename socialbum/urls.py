@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^facebook/', include('facebook.urls')),
     url(r'^album/', include('album.urls')),
     url(r'^game/', include('game.urls')),
+    url(r'^api/', include('api.urls')),
 
     # url(r'^accounts/', include('registration.backends.simple.urls')),
 

@@ -133,7 +133,8 @@ INSTALLED_APPS = (
     'home',
     'game',
     'scripts',
-    'south'
+    'south',
+    'tastypie',
     #'registration'
 )
 

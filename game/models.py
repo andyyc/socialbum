@@ -24,7 +24,6 @@ class Turn(models.Model):
     winner = models.OneToOneField('Submission', null=True, related_name='+')
     status = models.PositiveSmallIntegerField(default=0, choices=STATUSES)
 
-# Create your models here.
 class Topic(models.Model):
     text = models.TextField()
     deleted = models.BooleanField(default=False)
